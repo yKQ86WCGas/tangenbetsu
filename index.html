@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>単元別問題集</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#202124;--muted:#687078;--line:#d7dce1;--accent:#2257a5;--accent2:#e8eef8;--answer:#9b2c2c;--answerbg:#fff1f1}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text)}
+header{position:sticky;top:0;z-index:20;background:rgba(244,246,248,.97);backdrop-filter:blur(7px);border-bottom:1px solid var(--line);padding:12px 14px 10px}
+.headrow{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.title{font-weight:800;font-size:20px}.subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.nav button,.pageBtn,.unitBtn,.problemBtn,.answerBtn,.miniAnswerBtn{font:inherit;border:1px solid var(--line);background:white;border-radius:9px;padding:8px 12px;cursor:pointer}.nav button:hover,.pageBtn:hover,.problemBtn:hover{background:#f0f4f8}.nav button:disabled{opacity:.4;cursor:default}
+.pageJump{width:80px;padding:8px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit}
+#problemAnswerBtn{color:var(--answer);border-color:#d9a2a2;background:var(--answerbg);font-weight:700}#problemAnswerBtn:hover{background:#ffe4e4}
+#backProblemBtn{color:#fff;background:var(--answer);border-color:var(--answer);font-weight:700}
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px;max-width:1400px;margin:0 auto;padding:16px}
+.sidebar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;align-self:start;position:sticky;top:91px;max-height:calc(100vh - 110px);overflow:auto}.sideTitle{font-weight:700;font-size:14px;color:var(--muted);margin:2px 4px 8px}.unitBlock{margin-bottom:10px}.unitBtn{width:100%;text-align:left;font-weight:700;padding:10px}.unitBtn.active{background:var(--accent2);border-color:#a9bddc;color:#173f78}.problemList{display:none;padding:7px 0 0 10px;gap:6px;flex-direction:column}.unitBlock.open .problemList{display:flex}
+.problemRow{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:5px}.problemBtn{text-align:left;padding:7px 9px;font-size:14px;min-width:0}.problemBtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}.miniAnswerBtn{padding:6px 7px;font-size:12px;color:var(--answer);border-color:#d9a2a2;background:var(--answerbg);font-weight:700}.miniAnswerBtn.active{background:var(--answer);color:#fff;border-color:var(--answer)}
+.answerBtn{color:var(--answer);border-color:#d9a2a2;background:var(--answerbg);font-weight:700;text-align:left;padding:7px 9px}.answerBtn.active{background:var(--answer);color:#fff;border-color:var(--answer)}
+.viewerArea{min-width:0}.toolbar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}.currentTitle{font-size:18px;font-weight:800}.currentMeta{font-size:13px;color:var(--muted);margin-top:2px}.pageButtonsWrap{overflow-x:auto;white-space:nowrap;padding-top:10px}.pageButtons{display:inline-flex;gap:6px}.pageBtn{min-width:42px;padding:7px 10px;border-radius:999px}.pageBtn.active{background:var(--accent);color:white;border-color:var(--accent);font-weight:700}.answerMode .pageBtn.active{background:var(--answer);border-color:var(--answer)}
+.viewerCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:500px}.canvasWrap{background:#e9edf1;border-radius:10px;display:flex;justify-content:center;align-items:flex-start;min-height:500px;overflow:auto;padding:10px}.loading{color:var(--muted);padding:38px 12px;text-align:center;width:100%}canvas{max-width:100%;height:auto;background:white;box-shadow:0 2px 10px rgba(0,0,0,.14)}
+.answerCropMode .canvasWrap{align-items:center}.answerCropMode canvas{border:2px solid #e2b1b1;border-radius:4px}.answerCropMode .viewerCard{border-color:#e2b1b1;background:#fffafa}
+.notice{font-size:13px;color:var(--muted);line-height:1.65;margin-top:10px;padding:0 2px}.mobileSelect{display:none;width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;margin-top:8px}
+@media(max-width:850px){header{position:static}.layout{grid-template-columns:1fr;padding:10px}.sidebar{position:static;max-height:none}.title{font-size:18px}.viewerCard{padding:8px}.canvasWrap{padding:6px;min-height:360px}.sidebar{display:none}.mobileSelect{display:block}.currentTitle{font-size:16px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="headrow">
+    <div><div class="title">単元別問題集</div><div class="subtitle">問題を選択し，ページ番号ボタンで該当ページへ移動できます。</div></div>
+    <div class="nav">
+      <button id="prevBtn">前のページ</button><button id="nextBtn">次のページ</button>
+      <input id="pageInput" class="pageJump" type="number" min="1" value="1"><button id="goBtn">移動</button>
+      <button id="problemAnswerBtn">この問題の解答</button>
+      <button id="backProblemBtn" style="display:none">問題に戻る</button>
+    </div>
+  </div>
+  <select id="mobileSelect" class="mobileSelect"></select>
+</header>
+<div class="layout">
+  <aside id="sidebar" class="sidebar"><div class="sideTitle">単元・問題を選択</div></aside>
+  <main id="viewerArea" class="viewerArea">
+    <section id="toolbar" class="toolbar">
+      <div id="currentTitle" class="currentTitle">読み込み中…</div><div id="currentMeta" class="currentMeta"></div>
+      <div id="pageButtonsWrap" class="pageButtonsWrap"><div id="pageButtons" class="pageButtons"></div></div>
+    </section>
+    <section class="viewerCard"><div id="canvasWrap" class="canvasWrap"><div class="loading">PDFを読み込んでいます…</div><canvas id="pdfCanvas" hidden></canvas></div></section>
+    <div class="notice">各問題の右側にある「解答」または上部の「この問題の解答」を押すと，その問題の解答欄だけを拡大表示します。「解答一覧」では単元全体の解答用紙を確認できます。URL末尾を含めて共有すると，問題・ページまたは問題別解答へ直接リンクできます。</div>
+  </main>
+</div>
+<script type="module">
+import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs';
+const UNITS=[{"id": "A", "title": "自然環境", "answer": {"file": "pdf/A_answer.pdf", "pages": 1}, "problems": [{"id": "A1", "label": "第1問", "file": "pdf/A01.pdf", "pages": 7}, {"id": "A2", "label": "第2問", "file": "pdf/A02.pdf", "pages": 5}, {"id": "A3", "label": "第3問", "file": "pdf/A03.pdf", "pages": 4}, {"id": "A4", "label": "第4問", "file": "pdf/A04.pdf", "pages": 6}, {"id": "A5", "label": "第5問", "file": "pdf/A05.pdf", "pages": 5}]}, {"id": "B", "title": "地域調査と地図", "answer": {"file": "pdf/B_answer.pdf", "pages": 1}, "problems": [{"id": "B1", "label": "第1問", "file": "pdf/B01.pdf", "pages": 7}, {"id": "B2", "label": "第2問", "file": "pdf/B02.pdf", "pages": 6}, {"id": "B3", "label": "第3問", "file": "pdf/B03.pdf", "pages": 6}, {"id": "B4", "label": "第4問", "file": "pdf/B04.pdf", "pages": 8}, {"id": "B5", "label": "第5問", "file": "pdf/B05.pdf", "pages": 6}, {"id": "B6", "label": "第6問", "file": "pdf/B06.pdf", "pages": 5}]}, {"id": "C", "title": "産業", "answer": {"file": "pdf/C_answer.pdf", "pages": 1}, "problems": [{"id": "C1", "label": "第1問", "file": "pdf/C01.pdf", "pages": 7}, {"id": "C2", "label": "第2問", "file": "pdf/C02.pdf", "pages": 4}, {"id": "C3", "label": "第3問", "file": "pdf/C03.pdf", "pages": 7}, {"id": "C4", "label": "第4問", "file": "pdf/C04.pdf", "pages": 5}, {"id": "C5", "label": "第5問", "file": "pdf/C05.pdf", "pages": 7}, {"id": "C6", "label": "第6問", "file": "pdf/C06.pdf", "pages": 5}]}, {"id": "D", "title": "都市・交通・生活文化", "answer": {"file": "pdf/D_answer.pdf", "pages": 1}, "problems": [{"id": "D1", "label": "第1問", "file": "pdf/D01.pdf", "pages": 7}, {"id": "D2", "label": "第2問", "file": "pdf/D02.pdf", "pages": 5}, {"id": "D3", "label": "第3問", "file": "pdf/D03.pdf", "pages": 6}, {"id": "D4", "label": "第4問", "file": "pdf/D04.pdf", "pages": 5}, {"id": "D5", "label": "第5問", "file": "pdf/D05.pdf", "pages": 5}]}, {"id": "E", "title": "現代世界の諸課題", "answer": {"file": "pdf/E_answer.pdf", "pages": 1}, "problems": [{"id": "E1", "label": "第1問", "file": "pdf/E01.pdf", "pages": 6}, {"id": "E2", "label": "第2問", "file": "pdf/E02.pdf", "pages": 5}, {"id": "E3", "label": "第3問", "file": "pdf/E03.pdf", "pages": 7}, {"id": "E4", "label": "第4問", "file": "pdf/E04.pdf", "pages": 6}, {"id": "E5", "label": "第5問", "file": "pdf/E05.pdf", "pages": 6}]}, {"id": "F", "title": "世界の諸地域", "answer": {"file": "pdf/F_answer.pdf", "pages": 1}, "problems": [{"id": "F1", "label": "東アジア", "file": "pdf/F01.pdf", "pages": 6}, {"id": "F2", "label": "東南アジア", "file": "pdf/F02.pdf", "pages": 4}, {"id": "F3", "label": "アフリカ", "file": "pdf/F03.pdf", "pages": 6}, {"id": "F4", "label": "ヨーロッパ", "file": "pdf/F04.pdf", "pages": 7}, {"id": "F5", "label": "ＣＩＳ", "file": "pdf/F05.pdf", "pages": 7}, {"id": "F6", "label": "南北アメリカ", "file": "pdf/F06.pdf", "pages": 6}, {"id": "F7", "label": "オセアニア", "file": "pdf/F07.pdf", "pages": 7}]}];
+const ANSWER_CROPS={"A1": [132, 240, 374, 280], "A2": [132, 500, 374, 234], "A3": [132, 718, 374, 230], "A4": [518, 240, 374, 280], "A5": [518, 500, 374, 234], "B1": [127, 250, 383, 258], "B2": [127, 491, 383, 235], "B3": [127, 710, 383, 237], "B4": [522, 250, 382, 258], "B5": [522, 490, 382, 236], "B6": [522, 710, 382, 236], "C1": [91, 252, 398, 300], "C2": [91, 536, 398, 244], "C3": [91, 764, 398, 245], "C4": [502, 252, 398, 299], "C5": [502, 536, 398, 244], "C6": [502, 764, 398, 214], "D1": [118, 248, 372, 279], "D2": [118, 511, 372, 228], "D3": [118, 723, 372, 228], "D4": [501, 248, 371, 279], "D5": [501, 511, 371, 228], "E1": [102, 241, 390, 293], "E2": [102, 518, 390, 239], "E3": [102, 741, 390, 240], "E4": [505, 240, 389, 293], "E5": [505, 517, 389, 239], "F1": [113, 252, 378, 284], "F2": [113, 520, 378, 233], "F3": [113, 737, 378, 232], "F4": [113, 953, 378, 232], "F5": [502, 252, 377, 283], "F6": [502, 519, 377, 233], "F7": [502, 736, 377, 232]};
+const REF_W=993, REF_H=1404;
+const sidebar=document.getElementById('sidebar'), mobileSelect=document.getElementById('mobileSelect');
+const canvas=document.getElementById('pdfCanvas'),ctx=canvas.getContext('2d'),canvasWrap=document.getElementById('canvasWrap');
+const currentTitle=document.getElementById('currentTitle'),currentMeta=document.getElementById('currentMeta'),pageButtons=document.getElementById('pageButtons'),pageButtonsWrap=document.getElementById('pageButtonsWrap');
+const prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn'),pageInput=document.getElementById('pageInput'),goBtn=document.getElementById('goBtn'),problemAnswerBtn=document.getElementById('problemAnswerBtn'),backProblemBtn=document.getElementById('backProblemBtn'),toolbar=document.getElementById('toolbar'),viewerArea=document.getElementById('viewerArea');
+let pdfDoc=null,currentItem=null,currentPage=1,isRendering=false,pendingPage=null,lastProblem=null,loadToken=0;
+const problemMap=new Map(); UNITS.forEach(u=>u.problems.forEach(p=>problemMap.set(p.id,{...p,unit:u}))); const unitMap=new Map(UNITS.map(u=>[u.id,u]));
+function buildMenus(){
+ UNITS.forEach(u=>{
+  const block=document.createElement('div');block.className='unitBlock';block.dataset.unit=u.id;
+  const ub=document.createElement('button');ub.className='unitBtn';ub.textContent=`${u.id}　${u.title}`;ub.onclick=()=>block.classList.toggle('open');block.appendChild(ub);
+  const list=document.createElement('div');list.className='problemList';
+  u.problems.forEach(p=>{
+    const row=document.createElement('div');row.className='problemRow';
+    const b=document.createElement('button');b.className='problemBtn';b.dataset.item=p.id;b.textContent=p.label;b.onclick=()=>loadProblem(p.id,1,true);row.appendChild(b);
+    const ans=document.createElement('button');ans.className='miniAnswerBtn';ans.dataset.answer=p.id;ans.textContent='解答';ans.title=`${p.label}の解答`;ans.onclick=()=>loadProblemAnswer(p.id,true);row.appendChild(ans);list.appendChild(row);
+    const opt=document.createElement('option');opt.value=p.id;opt.textContent=`${u.id} ${u.title} - ${p.label}`;mobileSelect.appendChild(opt);
+  });
+  const ab=document.createElement('button');ab.className='answerBtn';ab.dataset.item=`${u.id}-answer`;ab.textContent='解答一覧';ab.onclick=()=>loadAnswerSheet(u.id,true);list.appendChild(ab);
+  const aopt=document.createElement('option');aopt.value=`${u.id}-answer`;aopt.textContent=`${u.id} ${u.title} - 解答一覧`;mobileSelect.appendChild(aopt);
+  block.appendChild(list);sidebar.appendChild(block);
+ });
+ mobileSelect.onchange=()=>{const v=mobileSelect.value;if(v.endsWith('-answer'))loadAnswerSheet(v[0],true);else loadProblem(v,1,true)};
+}
+function selectMenu(itemId,unitId){
+ document.querySelectorAll('.problemBtn,.answerBtn').forEach(b=>b.classList.toggle('active',b.dataset.item===itemId));
+ document.querySelectorAll('.miniAnswerBtn').forEach(b=>b.classList.toggle('active',currentItem?.type==='answerCrop'&&b.dataset.answer===currentItem.problemId));
+ document.querySelectorAll('.unitBlock').forEach(bl=>{const yes=bl.dataset.unit===unitId;bl.classList.toggle('open',yes);bl.querySelector('.unitBtn').classList.toggle('active',yes)});
+ if(itemId && mobileSelect.querySelector(`option[value="${itemId}"]`)) mobileSelect.value=itemId;
+}
+function setModeControls(){
+ const crop=currentItem?.type==='answerCrop', sheet=currentItem?.type==='answerSheet', problem=currentItem?.type==='problem';
+ [prevBtn,nextBtn,pageInput,goBtn].forEach(el=>el.style.display=crop?'none':'');
+ pageButtonsWrap.style.display=crop?'none':'';
+ problemAnswerBtn.style.display=problem?'inline-block':'none';
+ backProblemBtn.style.display=(crop||sheet)&&lastProblem?'inline-block':'none';
+ toolbar.classList.toggle('answerMode',crop||sheet);viewerArea.classList.toggle('answerCropMode',crop);
+}
+async function loadPdf(item,page=1,updateHash=false){
+ const token=++loadToken;currentItem=item;currentPage=page;pendingPage=null;isRendering=false;pdfDoc=null;
+ currentTitle.textContent=item.title;currentMeta.textContent='PDFを読み込み中…';pageButtons.innerHTML='';canvas.hidden=true;canvasWrap.querySelector('.loading')?.remove();const l=document.createElement('div');l.className='loading';l.textContent='PDFを読み込んでいます…';canvasWrap.prepend(l);
+ setModeControls();selectMenu(item.menuId,item.unit.id);
+ try{const task=pdfjsLib.getDocument(item.file);const doc=await task.promise;if(token!==loadToken)return;pdfDoc=doc;
+   if(item.type==='answerCrop'){await renderAnswerCrop();}
+   else{pageInput.max=doc.numPages;buildPageButtons(doc.numPages);await renderPage(Math.min(page,doc.numPages));}
+   if(updateHash)setHash();
+ }catch(e){console.error(e);currentMeta.textContent='PDFの読み込みに失敗しました。';canvasWrap.innerHTML='<div class="loading">PDFを表示できませんでした。index.html と pdf フォルダの配置を確認してください。</div>'}
+}
+function loadProblem(id,page=1,updateHash=false){const p=problemMap.get(id);if(!p)return;lastProblem={id,page};const item={...p,unit:p.unit,type:'problem',menuId:p.id,title:`${p.unit.id} ${p.unit.title}　${p.label}`};loadPdf(item,page,updateHash)}
+function loadProblemAnswer(id,updateHash=false){const p=problemMap.get(id);if(!p||!ANSWER_CROPS[id])return;if(currentItem?.type==='problem'&&currentItem.id===id)lastProblem={id,page:currentPage};else if(!lastProblem||lastProblem.id!==id)lastProblem={id,page:1};const item={unit:p.unit,type:'answerCrop',menuId:p.id,problemId:id,file:p.unit.answer.file,crop:ANSWER_CROPS[id],title:`${p.unit.id} ${p.unit.title}　${p.label}の解答`};loadPdf(item,1,updateHash)}
+function loadAnswerSheet(uid,updateHash=false){const u=unitMap.get(uid);if(!u)return;if(currentItem?.type==='problem')lastProblem={id:currentItem.id,page:currentPage};const item={...u.answer,unit:u,type:'answerSheet',menuId:`${uid}-answer`,title:`${uid} ${u.title}　解答一覧`};loadPdf(item,1,updateHash)}
+function buildPageButtons(n){for(let i=1;i<=n;i++){const b=document.createElement('button');b.className='pageBtn';b.textContent=i;b.dataset.page=i;b.onclick=()=>queueRender(i,true);pageButtons.appendChild(b)}}
+async function renderPage(n){if(!pdfDoc)return;isRendering=true;currentPage=n;updateUi();const page=await pdfDoc.getPage(n);const maxW=Math.min(canvasWrap.clientWidth-20,1050);const base=page.getViewport({scale:1});const scale=Math.max(1,maxW/base.width);const vp=page.getViewport({scale});canvas.width=Math.ceil(vp.width);canvas.height=Math.ceil(vp.height);canvas.hidden=false;canvasWrap.querySelector('.loading')?.remove();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);await page.render({canvasContext:ctx,viewport:vp}).promise;isRendering=false;if(pendingPage!==null){const p=pendingPage;pendingPage=null;renderPage(p)}}
+async function renderAnswerCrop(){
+ const page=await pdfDoc.getPage(1);const base=page.getViewport({scale:1});const [rx,ry,rw,rh]=currentItem.crop;
+ const x=rx*base.width/REF_W,y=ry*base.height/REF_H,w=rw*base.width/REF_W,h=rh*base.height/REF_H;
+ const maxW=Math.min(canvasWrap.clientWidth-24,980);const scale=Math.min(3.2,Math.max(1.65,maxW/w));const vp=page.getViewport({scale});
+ canvas.width=Math.ceil(w*scale);canvas.height=Math.ceil(h*scale);canvas.hidden=false;canvasWrap.querySelector('.loading')?.remove();
+ ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+ await page.render({canvasContext:ctx,viewport:vp,transform:[1,0,0,1,-x*scale,-y*scale]}).promise;
+ currentMeta.textContent='この問題の解答欄だけを拡大表示しています。';selectMenu(currentItem.menuId,currentItem.unit.id);
+}
+function queueRender(n,hash=false){if(!pdfDoc||currentItem?.type==='answerCrop'||n<1||n>pdfDoc.numPages)return;if(isRendering)pendingPage=n;else renderPage(n);if(hash)setTimeout(setHash,0)}
+function updateUi(){currentMeta.textContent=`ページ ${currentPage} / ${pdfDoc?.numPages||'-'}`;pageInput.value=currentPage;prevBtn.disabled=currentPage<=1;nextBtn.disabled=!pdfDoc||currentPage>=pdfDoc.numPages;document.querySelectorAll('.pageBtn').forEach(b=>b.classList.toggle('active',Number(b.dataset.page)===currentPage));document.querySelector('.pageBtn.active')?.scrollIntoView({block:'nearest',inline:'center'})}
+function setHash(){if(!currentItem)return;let h='';if(currentItem.type==='answerCrop')h=`${currentItem.problemId}-answer`;else if(currentItem.type==='answerSheet')h=`${currentItem.unit.id}-answer-p${currentPage}`;else h=`${currentItem.id}-p${currentPage}`;history.replaceState(null,'',`#${h}`)}
+function parseHash(){const h=location.hash.replace('#','');let m=h.match(/^([A-F]\d+)-answer$/);if(m&&problemMap.has(m[1]))return{type:'crop',id:m[1]};m=h.match(/^([A-F]\d+)-p(\d+)$/);if(m&&problemMap.has(m[1]))return{type:'p',id:m[1],page:Number(m[2])};m=h.match(/^([A-F])-answer-p(\d+)$/);if(m&&unitMap.has(m[1]))return{type:'sheet',id:m[1],page:Number(m[2])};return null}
+prevBtn.onclick=()=>queueRender(currentPage-1,true);nextBtn.onclick=()=>queueRender(currentPage+1,true);goBtn.onclick=()=>{const n=Number(pageInput.value);if(Number.isInteger(n)&&pdfDoc&&n>=1&&n<=pdfDoc.numPages)queueRender(n,true);else{alert(`1〜${pdfDoc?.numPages||1}のページ番号を入力してください。`);pageInput.value=currentPage}};pageInput.onkeydown=e=>{if(e.key==='Enter')goBtn.click()};
+problemAnswerBtn.onclick=()=>{if(currentItem?.type==='problem')loadProblemAnswer(currentItem.id,true)};backProblemBtn.onclick=()=>{if(lastProblem)loadProblem(lastProblem.id,lastProblem.page,true)};
+window.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;if(currentItem?.type==='answerCrop'&&e.key==='Escape')backProblemBtn.click();else{if(e.key==='ArrowLeft')prevBtn.click();if(e.key==='ArrowRight')nextBtn.click()}});let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(!pdfDoc)return;if(currentItem?.type==='answerCrop')renderAnswerCrop();else queueRender(currentPage,false)},200)});
+buildMenus();const initial=parseHash();if(initial?.type==='p')loadProblem(initial.id,initial.page,false);else if(initial?.type==='crop')loadProblemAnswer(initial.id,false);else if(initial?.type==='sheet')loadAnswerSheet(initial.id,false);else loadProblem(UNITS[0].problems[0].id,1,false);
+</script>
+</body>
+</html>
